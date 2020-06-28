@@ -1,0 +1,208 @@
+/* question 1 - original */
+db.question.explain('executionStats').aggregate([
+    {
+        '$lookup': {
+            'from': 'answer',
+            'localField': 'Id',
+            'foreignField': 'ParentId',
+            'as': 'answer_detail'
+        }
+    }, {
+        '$unwind': {
+            'path': '$Tags'
+        }
+    }, {
+        '$match': {
+            'Tags': 'terminology'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'AC_count': 1,
+            'subdocument': {
+                '$arrayElemAt': [
+                    '$answer_detail', 0
+                ]
+            }
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'attration': {
+                '$sum': [
+                    '$AC_count', '$subdocument.CommentCount'
+                ]
+            }
+        }
+    }, {
+        '$sort': {
+            'attration': -1
+        }
+    }, {
+        '$limit': 1
+    }
+])
+
+
+
+/* question 1 - new */
+db.question.explain('executionStats').aggregate([
+    {
+        '$unwind': {
+            'path': '$Tags'
+        }
+    }, {
+        '$match': {
+            'Tags': 'terminology'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'AC_count': 1,
+            'Id': 1
+        }
+    }, {
+        '$lookup': {
+            'from': 'answer',
+            'localField': 'Id',
+            'foreignField': 'ParentId',
+            'as': 'answer_detail'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'AC_count': 1,
+            'subdocument': {
+                '$arrayElemAt': [
+                    '$answer_detail', 0
+                ]
+            }
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'attration': {
+                '$sum': [
+                    '$AC_count', '$subdocument.CommentCount'
+                ]
+            }
+        }
+    }
+])
+
+
+
+/* question 3 - original */
+db.question.explain('executionStats').aggregate([
+    {
+        '$unwind': {
+            'path': '$Tags'
+        }
+    }, {
+        '$match': {
+            'Tags': 'terminology'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'AcceptedAnswerId': 1,
+            'CreationDate': 1
+        }
+    }, {
+        '$lookup': {
+            'from': 'answer',
+            'localField': 'AcceptedAnswerId',
+            'foreignField': 'Id',
+            'as': 'answer_detail'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'CreationDate': 1,
+            'subdocument': {
+                '$arrayElemAt': [
+                    '$answer_detail', 0
+                ]
+            }
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'CreationDate': 1,
+            'ans_date': '$subdocument.CreationDate'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'duration': {
+                '$subtract': [
+                    '$ans_date', '$CreationDate'
+                ]
+            }
+        }
+    }, {
+        '$sort': {
+            'duration': -1
+        }
+    }, {
+        '$limit': 1
+    }, {
+        '$project': {
+            'Title': 1
+        }
+    }
+])
+
+
+
+/* question 3 - new */
+db.question.explain('executionStats').aggregate([
+    {
+        '$project': {
+            'Title': 1,
+            'AcceptedAnswerId': 1,
+            'CreationDate': 1,
+            'Tags': 1
+        }
+    }, {
+        '$unwind': {
+            'path': '$Tags'
+        }
+    }, {
+        '$match': {
+            'Tags': 'terminology'
+        }
+    }, {
+        '$lookup': {
+            'from': 'answer',
+            'localField': 'AcceptedAnswerId',
+            'foreignField': 'Id',
+            'as': 'answer_detail'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'CreationDate': 1,
+            'subdocument': {
+                '$arrayElemAt': [
+                    '$answer_detail', 0
+                ]
+            }
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'CreationDate': 1,
+            'ans_date': '$subdocument.CreationDate'
+        }
+    }, {
+        '$project': {
+            'Title': 1,
+            'duration': {
+                '$subtract': [
+                    '$ans_date', '$CreationDate'
+                ]
+            }
+        }
+    }
+])
